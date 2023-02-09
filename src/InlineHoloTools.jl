@@ -80,7 +80,7 @@ module InlineHoloTools
     **This is *NOT* a CUDA kernel**\n
     The reconstructed volume is obtained from the complex amplitude. The complex amplitude is obtained by phase reconstruction using the GS method or by taking the square root of the intensity of the hologram image and casting the array in `ComplexF32`. A total of `recItr` slices can be obtained for each dz from the plane defined by `frontz`.
     """
-    function getReconstvolfromHolo!(vol::CuDeviceArray{Float32,3}, holo::CuDeviceMatrix{ComplexF32}, transfront::CuDeviceMatrix{ComplexF32}, transdz::CuDeviceMatrix{ComplexF32}, frontz::Float32, dz::Float32, recItr::Int, datLen::Int)
+    function getReconstvolfromHolo!(vol::CuDeviceArray{Float32,3}, holo::CuDeviceMatrix{ComplexF32}, transfront::CuDeviceMatrix{ComplexF32}, transdz::CuDeviceMatrix{ComplexF32}, recItr::Int, datLen::Int)
         holotmp = CuArray{ComplexF32}(undef,datLen,datLen)
         holo .= CUFFT.fftshift(CUFFT.fft(holo)) .* transfront
         holotmp .= CUFFT.ifft(CUFFT.fftshift(holo))
