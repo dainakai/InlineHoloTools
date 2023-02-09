@@ -5,7 +5,7 @@ module InlineHoloTools
     using StatsBase
     using Statistics
 
-    export loadholo, CuTransSqr!, CuTransFunc!, getPhaseRetrievedHolo!
+    export loadholo, CuTransSqr!, CuTransFunc!, getPhaseRetrievedHolo!, getReconstvolfromHolo!
     
     """
     Load a grayscale hologram and return as a Matrix
