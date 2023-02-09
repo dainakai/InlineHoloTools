@@ -44,7 +44,7 @@ module InlineHoloTools
     **This is *NOT* a CUDA kernel**\n
     Retrieve the phase information of recorded light with two holograms `img1` and `img2` by using Gerchberg-Saxton algorithm. The phase-retrieved plane is given as `Plane`. Forward and reverse transfer functions (`trans` and `transInv`) based on the distance between the two recorded holograms are needed, respectively. `iterations` specifies the number of times to perform iterative phase recovery based on the GS algorithm.
     """
-    function getPhaseRetrievedHolo!(Plane::CuDeviceMatrix{ComplexF32}, img1::CuDeviceMatrix{Float32}, img2::CuDeviceMatrix{Float32}, trans::CuDeviceMatrix{ComplexF32}, transInv::CuDeviceMatrix{ComplexF32}, iterations::Int, imgLen::Int, padFlag::Bool)
+    function getPhaseRetrievedHolo!(Plane::CuArray{ComplexF32, 2, CUDA.Mem.DeviceBuffer}, img1::CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}, img2::CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}, trans::CuArray{ComplexF32, 2, CUDA.Mem.DeviceBuffer}, transInv::CuArray{ComplexF32, 2, CUDA.Mem.DeviceBuffer}, iterations::Int, imgLen::Int, padFlag::Bool)
         datLen::Int = 0
         if padFlag
             datLen = imgLen*2
@@ -93,7 +93,7 @@ module InlineHoloTools
     **This is *NOT* a CUDA kernel**\n
     The reconstructed volume is obtained from the complex amplitude. The complex amplitude is obtained by phase reconstruction using the GS method or by taking the square root of the intensity of the hologram image and casting the array in `ComplexF32`. A total of `recItr` slices can be obtained for each dz from the plane defined by `frontz`.
     """
-    function getReconstvolfromHolo!(vol::CuDeviceArray{Float32,3}, holo::CuDeviceMatrix{ComplexF32}, transfront::CuDeviceMatrix{ComplexF32}, transdz::CuDeviceMatrix{ComplexF32}, recItr::Int, datLen::Int)
+    function getReconstvolfromHolo!(vol::CuArray{Float32, 3, CUDA.Mem.DeviceBuffer}, holo::CuArray{ComplexF32, 2, CUDA.Mem.DeviceBuffer}, transfront::CuArray{ComplexF32, 2, CUDA.Mem.DeviceBuffer}, transdz::CuArray{ComplexF32, 2, CUDA.Mem.DeviceBuffer}, recItr::Int, datLen::Int)
         holotmp = CuArray{ComplexF32}(undef,datLen,datLen)
         holo .= CUFFT.fftshift(CUFFT.fft(holo)) .* transfront
         holotmp .= CUFFT.ifft(CUFFT.fftshift(holo))
