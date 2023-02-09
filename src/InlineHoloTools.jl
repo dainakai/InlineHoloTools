@@ -44,7 +44,13 @@ module InlineHoloTools
     **This is *NOT* a CUDA kernel**\n
     Retrieve the phase information of recorded light with two holograms `img1` and `img2` by using Gerchberg-Saxton algorithm. The phase-retrieved plane is given as `Plane`. Forward and reverse transfer functions (`trans` and `transInv`) based on the distance between the two recorded holograms are needed, respectively. `iterations` specifies the number of times to perform iterative phase recovery based on the GS algorithm.
     """
-    function getPhaseRetrievedHolo!(Plane::CuDeviceMatrix{ComplexF32}, img1::CuDeviceMatrix{Float32}, img2::CuDeviceMatrix{Float32}, trans::CuDeviceMatrix{ComplexF32}, transInv::CuDeviceMatrix{ComplexF32}, iterations::Int, datLen::Int)
+    function getPhaseRetrievedHolo!(Plane::CuDeviceMatrix{ComplexF32}, img1::CuDeviceMatrix{Float32}, img2::CuDeviceMatrix{Float32}, trans::CuDeviceMatrix{ComplexF32}, transInv::CuDeviceMatrix{ComplexF32}, iterations::Int, imgLen::Int, padFlag::Bool)
+        if padFlag
+            datLen::Int = imgLen*2
+        else
+            datLen::Int = imgLen
+        end
+
         compAmp1 = CuArray{ComplexF32}(undef,(datLen,datLen))
         compAmp2 = CuArray{ComplexF32}(undef,(datLen,datLen))
         phi1 = CUDA.ones(datLen,datLen)
@@ -54,8 +60,14 @@ module InlineHoloTools
         sqrtImg2 = CuArray{Float32}(undef,(datLen,datLen))
         sqrtImg1 .= sqrt(mean(img1).*255.0)
         sqrtImg2 .= sqrt(mean(img1).*255.0)
-        sqrtImg1[div(datLen,4)+1:div(datLen,4)*3,div(datLen,4)+1:div(datLen,4)*3] .= sqrt.(img1.*255.0)
-        sqrtImg2[div(datLen,4)+1:div(datLen,4)*3,div(datLen,4)+1:div(datLen,4)*3] .= sqrt.(img2.*255.0)
+
+        if padFlag
+            sqrtImg1[div(datLen,4)+1:div(datLen,4)*3,div(datLen,4)+1:div(datLen,4)*3] .= sqrt.(img1.*255.0)
+            sqrtImg2[div(datLen,4)+1:div(datLen,4)*3,div(datLen,4)+1:div(datLen,4)*3] .= sqrt.(img2.*255.0)
+        else
+            sqrtImg1 .= sqrt.(img1.*255.0)
+            sqrtImg2 .= sqrt.(img2.*255.0)
+        end
     
         compAmp1 .= sqrtImg1.*1.0
     
